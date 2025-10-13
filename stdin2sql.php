@@ -13,7 +13,7 @@ declare(strict_types=1);
  *  cat ids.txt | php stdin2sql.php --sql 'INSERT INTO logs(raw) VALUES($1::text)' -H dbhost -P 5432 -d mydb -x "sslmode=require application_name=stdin2sql.php"
  */
 
-const APP_NAME = 'StdinSql';
+const APP_NAME = 'stdin2sql';
 const EXIT_OK = 0;
 const EXIT_USAGE = 2;
 const EXIT_ERR = 1;
@@ -32,9 +32,9 @@ function parseArgs() : array
 		exit(EXIT_USAGE);
 	}
 
-	$host = $opts['H'] ?? $opts['host'] ?: null;
-	$port = $opts['P'] ?? $opts['port'] ?: null;
-	$dbname = $opts['d'] ?? $opts['dbname'] ?: null;
+	$host = $opts['H'] ?? $opts['host'] ?? null;
+	$port = $opts['P'] ?? $opts['port'] ?? null;
+	$dbname = $opts['d'] ?? $opts['dbname'] ?? null;
 	$extra = $opts['x'] ?? $opts['extra'] ?? '';
 
 	return [$sql, $host, $port, $dbname, $extra];
@@ -76,59 +76,57 @@ function openDatabase(string $conn_str)
 {
 	$conn = @pg_connect($conn_str);
 	if ($conn === false)
-	{
 		throw new RuntimeException('Failed to connect to PostgreSQL: ' . pg_last_error());
-	}
 	return $conn;
 }
 
-function prepareIfNeeded($conn, string $sql) : ?string
+function prepareStatement($conn, string $sql) : string
 {
-	$has_param = str_contains($sql, '$1');
-
-	if ($has_param)
-	{
-		$name = 'stmt_' . bin2hex(random_bytes(8));
-		$res = @pg_prepare($conn, $name, $sql);
-		if ($res === false)
-		{
-			throw new RuntimeException('Failed to prepare statement: ' . pg_last_error($conn));
-		}
-		return $name;
-	}
-
-	return null;
+	$name = 'stmt_' . md5($sql);
+	$res = @pg_prepare($conn, $name, $sql);
+	if ($res === false)
+		throw new RuntimeException('Failed to prepare statement: ' . pg_last_error($conn));
+	pg_free_result($res);
+	return $name;
 }
 
-function executeForEachLine($conn, string $sql, ?string $stmt_name) : void
+function countParameters($conn, string $stmt_name) : int
 {
-	$use_params = ($stmt_name !== null);
+	$res = pg_query_params(
+		$conn,
+		"SELECT cardinality(parameter_types) AS n FROM pg_prepared_statements WHERE name = $1",
+		[$stmt_name]
+	);
+	$row = pg_fetch_assoc($res);
+	pg_free_result($res);
+	return (int)$row['n'];
+}
+
+function executeForEachLine($conn, string $sql, string $stmt_name) : void
+{
+	$count_parameters = countParameters($conn, $stmt_name);
+	if($count_parameters < 0 || $count_parameters > 1)
+		throw new RuntimeException("SQL statement must have 0 or 1 parameter, but found $count_parameters");
 
 	while (($line = fgets(STDIN)) !== false)
 	{
-		$payload = rtrim($line, "\r\n");
-
-		if ($use_params)
+		if($count_parameters)
 		{
+			$payload = rtrim($line, "\r\n");
 			$res = @pg_execute($conn, $stmt_name, [$payload]);
 		}
 		else
 		{
-			$res = @pg_query($conn, $sql);
+			$res = @pg_execute($conn, $stmt_name, []);
 		}
 
 		if ($res === false)
-		{
 			throw new RuntimeException('Query failed: ' . pg_last_error($conn));
-		}
-
-		// Consume result to free resources.
 		pg_free_result($res);
 	}
+
 	if (!feof(STDIN))
-	{
 		throw new RuntimeException('Error reading from STDIN.');
-	}
 }
 
 function main() : void
@@ -139,7 +137,7 @@ function main() : void
 
 	try
 	{
-		$stmt_name = prepareIfNeeded($conn, $sql);
+		$stmt_name = prepareStatement($conn, $sql);
 		executeForEachLine($conn, $sql, $stmt_name);
 	}
 	finally

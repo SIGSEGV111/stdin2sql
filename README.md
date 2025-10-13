@@ -40,12 +40,7 @@ The program connects using the provided options and `-x` extras, then:
 ## INPUT
 
 Reads UTF-8 text from stdin. Each non-empty line is processed independently.
-Trailing `\n` or `\r\n` is removed before binding or execution.
-
-## SQL PLACEHOLDER BEHAVIOR
-
-* If SQL contains `$1`, the program prepares the statement once and calls `EXECUTE` with the current line as parameter 1.
-* If SQL does **not** contain `$1`, the SQL is executed verbatim for each line. This is useful for commands that do not depend on input lines, but still want per-line pacing.
+Trailing `\n` or `\r\n` is removed before execution.
 
 ## CONNECTION
 
@@ -65,7 +60,7 @@ Kerberos/GSSAPI is used if PostgreSQL is configured accordingly. Ensure valid Ke
 **PGDATABASE**
 : Default database if **-d** not supplied.
 
-Standard libpq variables (e.g., `PGSSLMODE`, `PGSERVICE`, `PGTZ`) also apply via **-x** or environment.
+Standard libpq variables (e.g., `PGSSLMODE`, `PGSERVICE`, `PGTZ`) also apply.
 
 ## EXIT STATUS
 
