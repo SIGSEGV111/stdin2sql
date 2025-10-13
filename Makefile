@@ -20,7 +20,7 @@ rpm-install: rpm
 	zypper in "./$(ARCH_RPM_NAME)"
 
 clean:
-	rm -vf -- stdin2sql stdin2sql.1 *.rpm
+	rm -vf -- stdin2sql.1 *.rpm
 
 stdin2sql.1: README.md Makefile
 	go-md2man < README.md > stdin2sql.1
