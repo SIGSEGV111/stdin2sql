@@ -35,5 +35,5 @@ deploy: $(ARCH_RPM_NAME)
 	deploy-rpm.sh --infile=stdin2sql.src.rpm --outdir="$(RPMDIR)" --keyid="$(KEYID)" --srpm
 	deploy-rpm.sh --infile="$(ARCH_RPM_NAME)" --outdir="$(RPMDIR)" --keyid="$(KEYID)"
 
-$(ARCH_RPM_NAME) stdin2sql.src.rpm: Makefile stdin2sql.spec README.md stdin2sql.php
+$(ARCH_RPM_NAME) stdin2sql.src.rpm: Makefile stdin2sql.spec README.md LICENSE.md stdin2sql.php
 	easy-rpm.sh --name stdin2sql --outdir . --plain --arch "$(ARCH)" -- $^

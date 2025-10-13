@@ -128,10 +128,10 @@ Failures include connection errors, prepare/execute errors, and stdin read error
 
 `psql(1)`, `libpq(3)`, PostgreSQL documentation on GSSAPI and connection parameters.
 
-## AUTHOR
+# AUTHOR
 
-Generated for PHP 8+ environments using libpq functions (`pg_connect`, `pg_prepare`, `pg_execute`, `pg_query`).
+Written by Simon Brennecke.
 
-## VERSION
+# COPYRIGHT
 
-StdinSql, current release.
+Copyright (C) 2025 Simon Brennecke, licensed under GNU GPL version 3 or later.
