@@ -13,7 +13,7 @@ std2sql — execute a SQL statement once per input line with optional placeholde
 Reads stdin line by line and runs one SQL statement per line.
 The current line is bound as the first parameter to the SQL statement.
 Authentication is implicit and Kerberos/GSSAPI is supported.
-If any authentication information is required it must be passed via *extra options* (`-x`).
+If any authentication information is required it must be passed via *extra options* (`-x`) or environment.
 
 ## OPTIONS
 
@@ -42,6 +42,7 @@ Trailing `\n` or `\r\n` is removed before execution.
 * If the SQL returns rows, stdout receives one compact JSON **array per row**, one row per line.
 * If the SQL returns no rows, nothing is printed.
 * Values come from libpq’s text format. `stdin2sql.php` does not perform type decoding, so **all columns are emitted as JSON strings** regardless of their PostgreSQL types.
+* all other text (errors, diagnostics) is written to stderr
 
 ## CONNECTION
 
@@ -52,50 +53,30 @@ Kerberos/GSSAPI is used if PostgreSQL is configured accordingly. Ensure valid Ke
 
 ## ENVIRONMENT
 
-**PGHOST**
-: Default host if **-H** not supplied.
-
-**PGPORT**
-: Default port if **-P** not supplied.
-
-**PGDATABASE**
-: Default database if **-d** not supplied.
-
-Standard libpq variables (e.g., `PGSSLMODE`, `PGSERVICE`, `PGTZ`) also apply.
+Unless overwritten by command-line, all libpq environment variables apply.
+See PostgreSQL documentation for details.
 
 ## EXIT STATUS
 
 **0** on success.
 **1** on error (connection failure, query error, I/O error).
-**2** on usage error (missing **-s**).
+**2** on usage error (e.g. missing **-s**).
 
 ## EXAMPLES
 
 Insert each line as JSON into a table:
 
 ```sh
-cat data.ndjson | php std2sql.php -s 'INSERT INTO logs(payload) VALUES ($1::jsonb)' -d appdb
-```
-
-Call a function for each line:
-
-```sh
-awk '{print $1}' ids.txt | php std2sql.php -s 'SELECT process_id($1::bigint)' -d ops
-```
-
-Run a constant statement once per line (no binding):
-
-```sh
-yes | head -n 100 | php std2sql.php -s 'SELECT pg_sleep(0)' -d bench
+cat data.json | std2sql.php -s 'INSERT INTO data(payload) VALUES ($1::jsonb)' -d logdb
 ```
 
 Connect with extras:
 
 ```sh
-cat rows.txt | php std2sql.php \
+cat rows.txt | std2sql.php \
   -s 'INSERT INTO inbox(raw) VALUES ($1::text)' \
   -H db.internal -P 5432 -d ingest \
-  -x 'sslmode=require application_name=std2sql'
+  -x 'sslmode=require application_name=whatever'
 ```
 
 ## DIAGNOSTICS
@@ -122,7 +103,7 @@ Failures include connection errors, prepare/execute errors, and stdin read error
 
 ## SEE ALSO
 
-`psql(1)`, `libpq(3)`, PostgreSQL documentation on GSSAPI and connection parameters.
+`psql(1)`
 
 # AUTHOR
 

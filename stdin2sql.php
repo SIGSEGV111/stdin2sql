@@ -6,11 +6,9 @@ declare(strict_types=1);
  * stdin2sql.php
  * Reads stdin line-by-line and executes the given SQL for each line.
  * If the SQL contains a $1 placeholder, the current line is bound as the parameter.
- * Kerberos/GSSAPI auth via libpq (no username/password).
  *
  * Examples:
- *  echo "hello" | php stdin2sql.php -s 'SELECT $1::text' -d mydb
- *  cat ids.txt | php stdin2sql.php --sql 'INSERT INTO logs(raw) VALUES($1::text)' -H dbhost -P 5432 -d mydb -x "sslmode=require application_name=stdin2sql.php"
+ *  echo "hello" | stdin2sql.php -s 'SELECT $1::text' -d mydb -H mydbhost.example.org
  */
 
 const APP_NAME = 'stdin2sql';
