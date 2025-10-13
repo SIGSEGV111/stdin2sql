@@ -42,10 +42,16 @@ The program connects using the provided options and `-x` extras, then:
 Reads UTF-8 text from stdin. Each non-empty line is processed independently.
 Trailing `\n` or `\r\n` is removed before execution.
 
+## OUTPUT
+
+* If the SQL returns rows, stdout receives one compact JSON **array per row**, one row per line.
+* If the SQL returns no rows, nothing is printed.
+* Values come from libpq’s text format. `stdin2sql.php` does not perform type decoding, so **all columns are emitted as JSON strings** regardless of their PostgreSQL types.
+
 ## CONNECTION
 
 Builds a libpq connection string from options and environment.
-Sets `application_name=StdinSql` unless overridden via **-x**.
+Sets `application_name=stdin2sql` unless overridden via **-x**.
 
 Kerberos/GSSAPI is used if PostgreSQL is configured accordingly. Ensure valid Kerberos credentials (e.g., `kinit`) before running.
 

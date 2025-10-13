@@ -122,6 +122,10 @@ function executeForEachLine($conn, string $sql, string $stmt_name) : void
 
 		if ($res === false)
 			throw new RuntimeException('Query failed: ' . pg_last_error($conn));
+
+		while(($row = pg_fetch_row($res)) !== false)
+			echo(json_encode($row) . "\n");
+
 		pg_free_result($res);
 	}
 
