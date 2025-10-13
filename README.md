@@ -6,7 +6,7 @@ std2sql — execute a SQL statement once per input line with optional placeholde
 
 ## SYNOPSIS
 
-`std2sql.php` **-s** *SQL* [**-H** *host*] [**-P** *port*] [**-d** *dbname*] [**-x** *"extra options"*]
+`stdin2sql.php` **-s** *SQL* [**-H** *host*] [**-P** *port*] [**-d** *dbname*] [**-x** *"extra options"*]
 
 ## DESCRIPTION
 
@@ -34,7 +34,7 @@ If any authentication information is required it must be passed via *extra optio
 
 ## INPUT
 
-Reads UTF-8 text from stdin. Each non-empty line is processed independently.
+Reads UTF-8 text from stdin. Each line is processed independently and immediatelly committed.
 Trailing `\n` or `\r\n` is removed before execution.
 
 ## OUTPUT
@@ -67,13 +67,13 @@ See PostgreSQL documentation for details.
 Insert each line as JSON into a table:
 
 ```sh
-cat data.json | std2sql.php -s 'INSERT INTO data(payload) VALUES ($1::jsonb)' -d logdb
+cat data.json | stdin2sql.php -s 'INSERT INTO data(payload) VALUES ($1::jsonb)' -d logdb
 ```
 
 Connect with extras:
 
 ```sh
-cat rows.txt | std2sql.php \
+cat rows.txt | stdin2sql.php \
   -s 'INSERT INTO inbox(raw) VALUES ($1::text)' \
   -H db.internal -P 5432 -d ingest \
   -x 'sslmode=require application_name=whatever'
@@ -93,13 +93,6 @@ Failures include connection errors, prepare/execute errors, and stdin read error
 
 * Input lines are passed via parameter binding when `$1` is used, preventing SQL injection in that mode.
 * When no placeholder is present, the SQL is executed verbatim; avoid concatenating untrusted data into such statements.
-* Kerberos tickets must exist and be valid at runtime.
-
-## NOTES
-
-* The program frees each result immediately to bound memory usage on large streams.
-* libpq server-side prepared statements are created only when `$1` is present.
-* Lines consisting solely of a newline become empty strings if bound.
 
 ## SEE ALSO
 
