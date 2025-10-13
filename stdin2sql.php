@@ -18,17 +18,35 @@ const EXIT_OK = 0;
 const EXIT_USAGE = 2;
 const EXIT_ERR = 1;
 
+function printHelp() : void
+{
+	fwrite(STDERR, "Usage: {$_SERVER['argv'][0]}
+	-s|--sql='<SQL>'
+	[-H|--host='host']
+	[-P|--port=port]
+	[-d|--dbname=dbname]
+	[-x|--extra='extra options']
+");
+}
+
 function parseArgs() : array
 {
 	$opts = getopt(
-		's:H:P:d:x:',
-		['sql:', 'host:', 'port:', 'dbname:', 'extra:']
+		's:H:P:d:x:h',
+		['sql:', 'host:', 'port:', 'dbname:', 'extra:', 'help']
 	);
+
+	if(isset($opts['h']) || isset($opts['help']))
+	{
+		printHelp();
+		exit(EXIT_OK);
+	}
 
 	$sql = $opts['s'] ?? $opts['sql'] ?? null;
 	if ($sql === null || $sql === '')
 	{
-		fwrite(STDERR, "Usage: php stdin2sql.php -s '<SQL>' [-H host] [-P port] [-d dbname] [-x 'extra options']\n");
+		fwrite(STDERR, "[ERROR] SQL statement is required and cannot be an empty string\n");
+		printHelp();
 		exit(EXIT_USAGE);
 	}
 

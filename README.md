@@ -11,14 +11,9 @@ std2sql — execute a SQL statement once per input line with optional placeholde
 ## DESCRIPTION
 
 Reads stdin line by line and runs one SQL statement per line.
-If the SQL contains `$1`, the current line is bound as the first parameter.
-Authentication is via Kerberos/GSSAPI through libpq. No username or password is used.
-
-The program connects using the provided options and `-x` extras, then:
-
-1. Prepares the statement when `$1` is present.
-2. For each input line: trims the trailing newline, executes the statement, and frees the result.
-3. Exits non-zero on the first error.
+The current line is bound as the first parameter to the SQL statement.
+Authentication is implicit and Kerberos/GSSAPI is supported.
+If any authentication information is required it must be passed via *extra options* (`-x`).
 
 ## OPTIONS
 
