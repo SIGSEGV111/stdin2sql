@@ -91,8 +91,7 @@ Failures include connection errors, prepare/execute errors, and stdin read error
 
 ## SECURITY
 
-* Input lines are passed via parameter binding when `$1` is used, preventing SQL injection in that mode.
-* When no placeholder is present, the SQL is executed verbatim; avoid concatenating untrusted data into such statements.
+* Input lines are passed via parameter `$1`, preventing SQL injection.
 
 ## SEE ALSO
 
