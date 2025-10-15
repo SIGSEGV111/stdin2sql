@@ -73,12 +73,6 @@ function buildConnectionString(string|null $host, string|null $port, string|null
 		$parts[] = 'dbname=' . escapeshellarg($dbname);
 	}
 
-	// Always set application_name for traceability; allow user override in $extra.
-	if (stripos($extra, 'application_name=') === false)
-	{
-		$parts[] = 'application_name=' . escapeshellarg(APP_NAME);
-	}
-
 	$extra = trim($extra);
 	if ($extra !== '')
 	{

@@ -1,6 +1,4 @@
 Name:           stdin2sql
-Version:        1.0.0
-Release:        1%{?dist}
 Summary:        Execute a SQL statement once per stdin line with optional placeholder binding
 Group:          Applications/Databases
 Distribution:   openSUSE
