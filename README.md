@@ -12,8 +12,7 @@ std2sql — execute a SQL statement once per input line with optional placeholde
 
 Reads stdin line by line and runs one SQL statement per line.
 The current line is bound as the first parameter to the SQL statement.
-Authentication is implicit and Kerberos/GSSAPI is supported.
-If any authentication information is required it must be passed via *extra options* (`-x`) or environment.
+Any rows returned are printed on stdout.
 
 ## OPTIONS
 
@@ -47,9 +46,8 @@ Trailing `\n` or `\r\n` is removed before execution.
 ## CONNECTION
 
 Builds a libpq connection string from options and environment.
-Sets `application_name=stdin2sql` unless overridden via **-x**.
-
-Kerberos/GSSAPI is used if PostgreSQL is configured accordingly. Ensure valid Kerberos credentials (e.g., `kinit`) before running.
+Authentication is implicit and Kerberos/GSSAPI is supported.
+If any authentication information is required it must be passed via *extra options* (`-x`) or environment.
 
 ## ENVIRONMENT
 
